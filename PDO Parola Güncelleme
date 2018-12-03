@@ -1,0 +1,80 @@
+//// ----------------------ARAYÜZ FORM YAPISI(input ve button name önemli.)------------------------------------------
+<form action="(bulunduğuklasor)/kullanici.php" method="POST" class="form-horizontal" id="personal-info-form">
+   
+  <div class="form-group">
+		<label class="col-sm-3 control-label">Eski Şifrenizi Giriniz</label>
+		<div class="col-sm-9">
+         <input class="form-control" name="kullanici_eskipassword" id="first-name" type="password" placeholder="Eski şifrenizi giriniz.">
+            </div>
+                </div>
+   <div class="form-group">
+     <label class="col-sm-3 control-label">Şifreniz</label>
+     <div class="col-sm-9">
+      <input class="form-control"  name="kullanici_passwordone" id="last-name" type="password" placeholder="Yeni şifrenizi giriniz." >
+     </div>
+   </div>
+ <div class="form-group">
+  <label class="col-sm-3 control-label">Şifreniz Tekrar</label>
+  <div class="col-sm-9">
+  <input class="form-control" name="kullanici_passwordtwo" id="company-name" type="password" placeholder="Yeni şifrenizi tekrar giriniz." >
+   </div>
+ </div>
+<div class="form-group">
+<div align="right" class="col-sm-12">
+ <button name="musterisifreguncelle" class="update-btn" id="login-update">Şifre Güncelle</button>
+</div>
+ </div> 
+ </div>
+ </form> 
+ //----------------------------------------------------------------------------------------------------------
+ //TABLODA ŞİFRE GÜNCELLEME
+  if (isset($_POST['musterisifreguncelle'])) {
+ 	$kullanici_eskipassword=htmlspecialchars($_POST['kullanici_eskipassword']);
+ 	$kullanici_passwordone=htmlspecialchars($_POST['kullanici_passwordone']);
+ 	$kullanici_passwordtwo=htmlspecialchars($_POST['kullanici_passwordtwo']);
+ 	
+
+ 	$kullanici_password=md5($kullanici_eskipassword);
+ 	$kullanicisor=$db->prepare("SELECT * FROM kullanici where kullanici_password=:password");
+ 	$kullanicisor->execute(array(
+ 		'password'=> $kullanici_password ));
+ 	$say=$kullanicisor->rowCount();
+
+ 	if ($say==0) {
+
+ 		Header("Location:../../sifre-guncelle?durum=eskisifrehata");
+ 		exit();
+ 	}
+
+
+
+ 	if ($kullanici_passwordone==$kullanici_passwordtwo) {
+ 		if (strlen($kullanici_passwordone)>=6) {
+$yeni_password=md5($kullanici_passwordone);
+ 			
+	$kullaniciguncelle=$db->prepare("UPDATE kullanici SET 
+		kullanici_password=:kullanici_password	
+		WHERE kullanici_id={$_SESSION['user_kullaniciid']}");
+	  $update=$kullaniciguncelle->execute(array(
+
+	  	'kullanici_password'=>$yeni_password ));
+	  if ($update) {
+	  	Header("Location:../../sifre-guncelle?durum=ok");	  	
+	  }
+	  else{
+	  Header("Location:../../sifre-guncelle?durum=hata");
+	  }
+ 		}
+ 		else{
+ 			Header("Location:../../sifre-guncelle?durum=eksiksifre");
+ 		exit();
+
+ 		}
+ 		
+ 	} else
+ 	{
+ 		Header("Location:../../sifre-guncelle?durum=sifreleruyusmuyor");
+ 		exit();
+ 	}
+
+}
