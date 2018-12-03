@@ -1,0 +1,97 @@
+//Ziyaretcilerin ip ve zaman için kaydedildiği bir tablo oluşturuldu. Hem toplam ziyaretçi sayısı hem ziyaretçi ipleri 
+hemde ziyaret tarihleri verilerine ulaşılacak.
+Aynı ziyaretçi 10 dk içinde sayfayı yenilerse bu yeni bir ziyaretçi sayılmayacak. 10 dk geçtikten sonra tekrar sayfaya girerse ziyaretci 
+sayısı artırılacak.
+-----------------------------------------------------------------------------------------------------------------------
+
+// GİRİLEN SAYFAYA EKLENECEK KODLAR
+----------------------------------------------------------------------------------------------------------------------
+<?php
+    function getUserIP()
+    {
+    $client  = @$_SERVER['HTTP_CLIENT_IP'];
+    $forward = @$_SERVER['HTTP_X_FORWARDED_FOR'];
+    $remote  = $_SERVER['REMOTE_ADDR'];
+
+    if(filter_var($client, FILTER_VALIDATE_IP))
+    {
+        $ip = $client;
+    }
+    elseif(filter_var($forward, FILTER_VALIDATE_IP))
+    {
+        $ip = $forward;
+    }
+    else
+    {
+        $ip = $remote;
+    }
+
+    return $ip;
+    }
+    //$user_ip = getUserIP();
+        //echo $user_ip;
+    ?>
+    ////////////////--------------------------------------------------------------------
+     <script>
+
+            var ip = "<?=getUserIP();?>";
+
+            $.ajax({
+                type: "POST",
+                url: "<?=base_url()?>home/ziyaret",
+                data: {"ip":ip},
+                dataType: "json",
+                cache: "false",
+                success: function (data) {
+                    alert(data);
+                }
+            });
+
+        //alert(result);
+    </script>
+    
+    ///////////////////////----------------------------------------------------------------
+    
+////BİLGİLERİN KAYDEDİLECEĞİ ÇALIŞACAK OLAN FONKSİYON----*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+    public function ziyaret()
+	{   date_default_timezone_set('Europe/Istanbul');
+		$today = time();
+		$deger="::1";
+		$ip=$this->input->post('ip');		
+		$zaman = date('d.m.Y H:i:s');
+		$data = array(
+			'ip' => $ip,
+			'zaman' => $zaman,
+			'time'	=>$today		
+		);	
+
+        $query=$this->db->query("SELECT * FROM ziyaretciler WHERE ip='$ip' order by zaman DESC LIMIT 1");
+		$veri=$query->result();
+		
+		if($veri!=NULL)
+        {
+        			
+        $before=$veri[0]->time;
+        $difference = $today - $before;    
+            
+        $minute_difference =$difference/60;      
+		
+           if($difference>=600) 
+           {
+             $this->Database_Model->insert_data("ziyaretciler",$data);
+           } 
+           elseif($difference<600)
+           {
+           $sorgu=$this->db->query("UPDATE ziyaretciler SET zaman='$zaman' , time='$today' WHERE ip='$ip' order by zaman DESC LIMIT 1");
+           }        
+			
+		}
+		else
+		{
+			$this->Database_Model->insert_data("ziyaretciler",$data);
+		}	
+		
+				
+    }
+    
+    
