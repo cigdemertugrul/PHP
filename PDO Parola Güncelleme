@@ -28,6 +28,7 @@
  </form> 
  //----------------------------------------------------------------------------------------------------------
  //TABLODA ŞİFRE GÜNCELLEME
+ <?php
   if (isset($_POST['musterisifreguncelle'])) {
  	$kullanici_eskipassword=htmlspecialchars($_POST['kullanici_eskipassword']);
  	$kullanici_passwordone=htmlspecialchars($_POST['kullanici_passwordone']);
@@ -78,3 +79,4 @@ $yeni_password=md5($kullanici_passwordone);
  	}
 
 }
+?>
