@@ -1,0 +1,45 @@
+// Örnek Form-------------------------------------------------------------------------------
+<form action="../netting/islem.php" method="POST">
+            <h1>Yönetim Paneli </h1>            
+            <div>
+              <input type="text" name="kullanici_mail" class="form-control" placeholder="Kullanıcı Adınız (Mail)" required="" />
+            </div>
+            <div>
+              <input type="password" name="kullanici_password" class="form-control" placeholder="Şifreniz" required="" />
+            </div>
+            <div>
+            <button  type="submit" name="admingiris" class="btn btn-default"> Giriş Yap</button>
+            </div>
+</form>
+//Formun Gönderildiği Kısım-----------------------------------------------------------------
+<?php
+//Dikkat(ob_start();
+session_start(); unutulmamalı.)//
+if (isset($_POST['admingiris'])) {
+
+	$kullanici_mail=$_POST['kullanici_mail'];
+	$kullanici_password=md5($_POST['kullanici_password']);
+
+	$kullanicisor=$db->prepare("SELECT * FROM kullanici where kullanici_mail=:mail and kullanici_password=:password and kullanici_yetki=:yetki");
+	$kullanicisor->execute(array(
+		'mail' => $kullanici_mail,
+		'password' => $kullanici_password,
+		'yetki' => 5
+	));
+
+	echo $say=$kullanicisor->rowCount();
+
+	if ($say==1) {
+
+		$_SESSION['kullanici_mail']=$kullanici_mail;
+		header("Location:../production/index.php");
+		exit;
+
+	} else {
+
+		header("Location:../production/login.php?durum=no");
+		exit;
+	}}
+  ?>
+  //----------------------------------------------------------------------------------------
+  
